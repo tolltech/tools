@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Tolltech.Core.Helpers;
+using Vostok.Logging.Abstractions;
 
 namespace Tolltech.WhoPrometheus;
 
@@ -11,6 +12,8 @@ public interface IWParser
 
 public class WParser : IWParser
 {
+    private readonly ILog log = LogProvider.Get();
+    
     public SshClientInfo[] Parse(string wCommand)
     {
         return parse(wCommand).ToArray();
@@ -47,6 +50,9 @@ public class WParser : IWParser
             columnInds.Add(i);
         }
 
+        log.Info($"W Parser: header {header}");
+        log.Info($"W Parser: Word inds {string.Join(',', columnInds)}");
+        
         foreach (var line in lines.Skip(2))
         {
             var words = new List<string>();
@@ -55,6 +61,8 @@ public class WParser : IWParser
                 var current = columnInds[columnIndex];
                 var next = columnInds.Count - 1 > columnIndex ? columnInds[columnIndex + 1] : line.Length;
 
+                log.Info($"W Parser: Try get word from {current} to {next} of line '{line}'");
+                
                 var word = line.Substring(current, next - current).Trim(' ');
                 if (string.IsNullOrWhiteSpace(word)) word = "NONE";
                 words.Add(word.Trim(' '));

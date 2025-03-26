@@ -65,4 +65,23 @@ root              192.168.2.3      15:15    2:19m  0.00s  0.98s sshd: root@pts/0
         var actual = wParser.Parse(client);
         actual.Should().Be(@"{user=""tolltech"",tty=""tty1"",from=""-"",login=""14:51"",idle=""2:51m"",jcpu=""0.03s"",pcpu=""0.01s"",what=""-bash""}");
     }
+
+    [Test]
+    public void BigTest()
+    {
+        var input = @" 18:31:09 up  3:40,  4 users,  load average: 1,58, 1,62, 1,58
+USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU  WHAT
+tolltech tty1     -                14:51    3:40m  0.03s  0.01s -bash
+root              192.168.2.3      16:53    3:08m  0.00s  0.56s sshd: root@notty
+root              192.168.2.3      17:33    3:08m  0.00s  0.30s sshd: root@pts/1";
+        
+        var clients = wParser.Parse(input);
+        var actuals = new List<string>();
+        foreach (var client in clients)
+        {
+            actuals.Add(wParser.Parse(client));
+        }
+        
+        actuals.Count.Should().Be(3);
+    }
 }

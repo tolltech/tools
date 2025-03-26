@@ -60,7 +60,11 @@ public class WhoPrometheusListener : IWhoPrometheusListener
         //wireguard_latest_handshake_seconds{interface="wg0",enabled="true",address="10.8.0.2",name="tolltech"} 13509.351
         //wireguard_latest_handshake_seconds{interface="wg0",enabled="true",address="10.8.0.3",name="Kate"} 4.351
 
+        log.Info($"Get w info:\r\n{wInfo}");
+        
         var sshClients = wParser.Parse(wInfo);
+        
+        
         
         const string metricName = "tolls_ssh_clients";
         var sb = new StringBuilder();
