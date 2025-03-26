@@ -64,8 +64,8 @@ public class WParser : IWParser
                 var next = columnInds.Count - 1 > columnIndex ? columnInds[columnIndex + 1] : line.Length;
 
                 log.Info($"W Parser: Try get word from {current} to {next} of line '{line}'");
-                
-                var word = line.Substring(current, next - current).Trim(' ');
+
+                var word = line.Substring(current, next - current).Trim(' ').Replace(" ", "_");
                 if (string.IsNullOrWhiteSpace(word)) word = "NONE";
                 words.Add(word.Trim(' '));
             }

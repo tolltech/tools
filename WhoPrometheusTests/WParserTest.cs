@@ -43,7 +43,7 @@ root              192.168.2.3      15:15    2:19m  0.00s  0.98s sshd: root@pts/0
             Idle = "2:19m",
             JCpu = "0.00s",
             PCpu = "0.98s",
-            What = "sshd: root@pts/0"
+            What = "sshd:_root@pts/0"
         });
     }
 
