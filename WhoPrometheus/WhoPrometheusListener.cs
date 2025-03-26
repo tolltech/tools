@@ -7,12 +7,14 @@ namespace Tolltech.WhoPrometheus;
 
 public class WhoPrometheusListener : IWhoPrometheusListener
 {
+    private readonly IWParser wParser;
     private readonly ILog log = LogProvider.Get();
     private readonly int port
         ;
 
-    public WhoPrometheusListener(WhoPrometheusSettings settings)
+    public WhoPrometheusListener(WhoPrometheusSettings settings, IWParser wParser)
     {
+        this.wParser = wParser;
         port = settings.Port;
     }
 
@@ -49,6 +51,43 @@ public class WhoPrometheusListener : IWhoPrometheusListener
     }
 
     private async Task<string> GetInfo()
+    {
+        var wInfo = await GetWInfo();
+        //# HELP wg-easy and wireguard metrics
+        // 
+        //# HELP wireguard_latest_handshake_seconds UNIX timestamp seconds of the last handshake
+        //# TYPE wireguard_latest_handshake_seconds gauge
+        //wireguard_latest_handshake_seconds{interface="wg0",enabled="true",address="10.8.0.2",name="tolltech"} 13509.351
+        //wireguard_latest_handshake_seconds{interface="wg0",enabled="true",address="10.8.0.3",name="Kate"} 4.351
+
+        var sshClients = wParser.Parse(wInfo);
+        
+        const string metricName = "tolls_ssh_clients";
+        var sb = new StringBuilder();
+        sb.AppendLine($"# HELP ssh metrics");
+        sb.AppendLine();
+        sb.AppendLine($"# HELP ssh metrics from w command");
+        sb.AppendLine($"# TYPE {metricName} gauge");
+        foreach (var sshClientInfo in sshClients)
+        {
+            sb.AppendLine($"{metricName}{SShClientInfoToMetric(sshClientInfo)} 1");
+        }
+
+        const string totalMetricsName = "tolls_ssh_clients_count";
+        sb.AppendLine();
+        sb.AppendLine($"# HELP ssh metrics from w command");
+        sb.AppendLine($"# TYPE {totalMetricsName} gauge");
+        sb.AppendLine($"{totalMetricsName}{{ssh_clients=\"ssh_clients\"}} {sshClients.Length}");
+        
+        return sb.ToString();
+    }
+
+    private string SShClientInfoToMetric(SshClientInfo clientInfo)
+    {
+        return wParser.Parse(clientInfo);
+    }
+    
+    private async Task<string> GetWInfo()
     {
         var proc = new Process
         {

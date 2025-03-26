@@ -13,4 +13,9 @@ public static class Helper
         
         return int.Parse(src);
     }
+
+    public static string[] SplitLines(this string src)
+    {
+        return src.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+    }
 }
