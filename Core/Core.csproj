@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AssemblyName>Tolltech.Core</AssemblyName>
+        <RootNamespace>Tolltech.Core</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+      <PackageReference Include="Vostok.Logging.Console" Version="1.0.11" />
+      <PackageReference Include="Vostok.Logging.File" Version="1.0.24" />
+    </ItemGroup>
+
+</Project>
