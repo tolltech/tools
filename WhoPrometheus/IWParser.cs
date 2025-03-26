@@ -12,7 +12,7 @@ public interface IWParser
 
 public class WParser : IWParser
 {
-    private readonly ILog log = LogProvider.Get();
+    private readonly ILog log = new SilentLog();
     
     public SshClientInfo[] Parse(string wCommand)
     {
@@ -55,6 +55,8 @@ public class WParser : IWParser
         
         foreach (var line in lines.Skip(2))
         {
+            if (string.IsNullOrWhiteSpace(line)) continue;
+            
             var words = new List<string>();
             for (var columnIndex = 0; columnIndex < columnInds.Count; columnIndex++)
             {
