@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using Vostok.Logging.Abstractions;
 
@@ -9,8 +8,15 @@ namespace Tolltech.WhoPrometheus;
 public class WhoPrometheusListener : IWhoPrometheusListener
 {
     private readonly ILog log = LogProvider.Get();
+    private readonly int port
+        ;
 
-    public async Task StartListeningAsync(int port)
+    public WhoPrometheusListener(WhoPrometheusSettings settings)
+    {
+        port = settings.Port;
+    }
+
+    public async Task StartListeningAsync()
     {
         log.Info("Starting WhoPrometheusListener");
         
@@ -23,12 +29,22 @@ public class WhoPrometheusListener : IWhoPrometheusListener
         {
             var context = await listener.GetContextAsync();
             var response = context.Response;
-            var responseString = await GetInfo();
-            var buffer = Encoding.UTF8.GetBytes(responseString);
-            response.ContentType = "text/plain";
-            response.ContentLength64 = buffer.Length;
-            await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
-            response.Close();
+            try
+            {
+                var responseString = await GetInfo();
+                var buffer = Encoding.UTF8.GetBytes(responseString);
+                response.ContentType = "text/plain";
+                response.ContentLength64 = buffer.Length;
+                await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+            }
+            catch (Exception e)
+            {
+                log.Error(e, $"WhePrometheusException");
+            }
+            finally
+            {
+                response.Close();
+            }
         }
     }
 
@@ -38,7 +54,7 @@ public class WhoPrometheusListener : IWhoPrometheusListener
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = "ipconfig",
+                FileName = "w",
                 Arguments = string.Empty,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
@@ -54,19 +70,5 @@ public class WhoPrometheusListener : IWhoPrometheusListener
         }
         
         return sb.ToString();
-    }
-
-    private void WriteResponse(NetworkStream networkStream, string message)
-    {
-        var contentLength = Encoding.UTF8.GetByteCount(message);
-
-        var response = $@"HTTP/1.1 200 OK
-Content-Type: text/plain; charset=UTF-8
-Content-Length: {contentLength}
-
-{message}";
-        var responseBytes = Encoding.UTF8.GetBytes(response);
-
-        networkStream.Write(responseBytes, 0, responseBytes.Length);
     }
 }

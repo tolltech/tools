@@ -1,7 +1,7 @@
-﻿using System.Diagnostics;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using Tolltech.Core;
+using Tolltech.Core.Helpers;
 using Tolltech.WhoPrometheus;
 using Vostok.Logging.Abstractions;
 using Vostok.Logging.Console;
@@ -22,10 +22,21 @@ try
 {
     var services = new ServiceCollection();
     IoCResolver.Resolve((x, y) => services.AddSingleton(x, y), null, "Tolltech");
-    var serviceProvider = services.BuildServiceProvider();
 
+    string settingsStr;
+    if (args.Length > 0) settingsStr = args[0];
+    else if (File.Exists("args.txt")) settingsStr = File.ReadAllText("args.txt");
+    else settingsStr = "[]";
+    
+    var settings = JsonConvert.DeserializeObject<AppSettings>(settingsStr)!;
+    services.AddSingleton(settings);
+    services.AddSingleton(new WhoPrometheusSettings(settings.Settings.SafeGet("WhoPrometheus")?.KeyValues));
+    
+    var serviceProvider = services.BuildServiceProvider();
+    
+    
     var whoPrometheusListener = serviceProvider.GetRequiredService<IWhoPrometheusListener>();
-    await whoPrometheusListener.StartListeningAsync(9700);
+    await whoPrometheusListener.StartListeningAsync();
 }
 catch (Exception e)
 {

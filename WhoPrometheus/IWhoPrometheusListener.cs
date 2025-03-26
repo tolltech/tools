@@ -2,5 +2,5 @@
 
 public interface IWhoPrometheusListener
 {
-    Task StartListeningAsync(int port);
+    Task StartListeningAsync();
 }

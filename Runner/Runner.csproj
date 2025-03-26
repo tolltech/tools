@@ -18,4 +18,10 @@
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.3" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="args.txt">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>
