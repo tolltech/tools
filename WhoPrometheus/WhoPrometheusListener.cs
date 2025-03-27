@@ -74,8 +74,8 @@ public class WhoPrometheusListener : IWhoPrometheusListener
         sb.AppendLine($"# TYPE {metricName} gauge");
         foreach (var sshClientInfo in sshClients)
         {
-            var keyStr = $"{sshClientInfo.User}{sshClientInfo.From}{sshClientInfo.Tty}";
-            sb.AppendLine($"{metricName}{SShClientInfoToMetric(sshClientInfo)} {Math.Abs(keyStr.GetHashCode()) % 20}");
+            var keyStr = $"{sshClientInfo.User}{sshClientInfo.From}{sshClientInfo.Tty}{sshClientInfo.What}";
+            sb.AppendLine($"{metricName}{SShClientInfoToMetric(sshClientInfo)} {Math.Abs(keyStr.GetHashCode()) % 100}");
         }
 
         const string totalMetricsName = "tolls_ssh_clients_count";
