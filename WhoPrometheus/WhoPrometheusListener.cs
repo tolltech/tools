@@ -9,8 +9,11 @@ public class WhoPrometheusListener : IWhoPrometheusListener
 {
     private readonly IWParser wParser;
     private readonly ILog log = LogProvider.Get();
-    private readonly int port
-        ;
+    private readonly int port;
+
+    private static int prevCounter = 0;
+    private static int accCounter = 0;
+    private static readonly object locker = new();
 
     public WhoPrometheusListener(WhoPrometheusSettings settings, IWParser wParser)
     {
@@ -64,8 +67,6 @@ public class WhoPrometheusListener : IWhoPrometheusListener
         
         var sshClients = wParser.Parse(wInfo);
         
-        
-        
         const string metricName = "tolls_ssh_clients";
         var sb = new StringBuilder();
         sb.AppendLine($"# HELP ssh metrics");
@@ -83,6 +84,23 @@ public class WhoPrometheusListener : IWhoPrometheusListener
         sb.AppendLine($"# HELP ssh metrics from w command");
         sb.AppendLine($"# TYPE {totalMetricsName} gauge");
         sb.AppendLine($"{totalMetricsName}{{ssh_clients=\"ssh_clients\"}} {sshClients.Length}");
+
+        lock (locker)
+        {
+            var currentCount = sshClients.Length;
+            if (currentCount > prevCounter)
+            {
+                accCounter += currentCount - prevCounter;
+            }
+            
+            prevCounter = currentCount;
+        }
+        
+        const string accMetricsName = "tolls_ssh_clients_acc";
+        sb.AppendLine();
+        sb.AppendLine($"# HELP ssh metrics from w command");
+        sb.AppendLine($"# TYPE {accMetricsName} counter");
+        sb.AppendLine($"{accMetricsName}{{ssh_clients_acc=\"ssh_clients_acc\"}} {accCounter}");
         
         return sb.ToString();
     }
